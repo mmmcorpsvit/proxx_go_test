@@ -10,8 +10,8 @@ import (
 
 // Field represents a two-dimensional field of cells.
 type Field struct {
-	cell          [][]int
-	width, height int
+	cell [][]int
+	//width, height int
 }
 
 // Game Config
@@ -36,10 +36,10 @@ func GetRandomInt(value int) int {
 	return int(n)
 }
 
-func SetSurrounding(cell [][]int, x, y, dx, dy, height, width int) [][]int {
+func SetSurrounding(cell [][]int, x, y, dx, dy int) [][]int {
 	// Check boundaries
 	if x+dx >= 0 && y+dy >= 0 &&
-		x+dx < height && y+dy < width &&
+		x+dx < GameFieldHeight && y+dy < GameFieldWidth &&
 		// This is not Black Hole ?
 		cell[x+dx][y+dy] != -1 {
 		cell[x+dx][y+dy]++ // Inc counter
@@ -48,22 +48,22 @@ func SetSurrounding(cell [][]int, x, y, dx, dy, height, width int) [][]int {
 	return cell
 }
 
-func NewField(height, width, blackHolesCount int) *Field {
+func NewField(gameFieldBlackHoles int) *Field {
 	// TODO: add validator, h>2, w>2, black_holes_count > 0
 	// TODO: check math lib to create matrix
 	// https://stackoverflow.com/questions/39804861/what-is-a-concise-way-to-create-a-2d-slice-in-go
-	f := make([][]int, width)
+	f := make([][]int, GameFieldWidth)
 	for i := range f {
-		f[i] = make([]int, height)
+		f[i] = make([]int, GameFieldHeight)
 	}
 
 	// add Black Holes
 	blackHolesCounter := 0
 	x := 0
 	y := 0
-	for blackHolesCounter < blackHolesCount {
-		x = GetRandomInt(width)
-		y = GetRandomInt(height)
+	for blackHolesCounter < gameFieldBlackHoles {
+		x = GetRandomInt(GameFieldWidth)
+		y = GetRandomInt(GameFieldHeight)
 
 		// update only this not Black Hole cell
 		if f[x][y] != -1 {
@@ -73,44 +73,45 @@ func NewField(height, width, blackHolesCount int) *Field {
 	}
 
 	// compute cells
-	for x := 0; x < width; x++ {
-		for y := 0; y < height; y++ {
+	for x := 0; x < GameFieldWidth; x++ {
+		for y := 0; y < GameFieldHeight; y++ {
 			if f[x][y] == -1 {
-				SetSurrounding(f, x, y, -1, -1, width, height)
-				SetSurrounding(f, x, y, -1, 0, width, height)
-				SetSurrounding(f, x, y, -1, 1, width, height)
+				SetSurrounding(f, x, y, -1, -1)
+				SetSurrounding(f, x, y, -1, 0)
+				SetSurrounding(f, x, y, -1, 1)
 
-				SetSurrounding(f, x, y, 1, -1, width, height)
-				SetSurrounding(f, x, y, 1, 0, width, height)
-				SetSurrounding(f, x, y, 1, 1, width, height)
+				SetSurrounding(f, x, y, 1, -1)
+				SetSurrounding(f, x, y, 1, 0)
+				SetSurrounding(f, x, y, 1, 1)
 
-				SetSurrounding(f, x, y, 0, -1, width, height)
-				SetSurrounding(f, x, y, 0, 1, width, height)
+				SetSurrounding(f, x, y, 0, -1)
+				SetSurrounding(f, x, y, 0, 1)
 			}
 		}
 	}
 
-	return &Field{cell: f, width: width, height: height}
+	return &Field{cell: f}
+	//return &Field{cell: f, width: width, height: height}
 }
 
 func Display(debug bool) {
 	fmt.Print("   ")
-	for x := 0; x < GameField.height; x++ {
+	for x := 0; x < GameFieldHeight; x++ {
 		fmt.Print(x)
 		fmt.Print("  ")
 	}
 	fmt.Println()
 
 	fmt.Print("   ")
-	for x := 0; x < GameField.height; x++ {
+	for x := 0; x < GameFieldHeight; x++ {
 		fmt.Print("-")
 		fmt.Print("  ")
 	}
 	fmt.Println()
 
-	for x := 0; x < GameField.width; x++ {
+	for x := 0; x < GameFieldWidth; x++ {
 		s := ""
-		for y := 0; y < GameField.height; y++ {
+		for y := 0; y < GameFieldHeight; y++ {
 			// TODO: do better output
 			//fmt.Print(strconv.FormatInt(int64(f.s[i][k]), 10) + "   ")
 			//value := 0
@@ -166,8 +167,8 @@ func main() {
 	//fmt.Println("*********************************")
 	//fmt.Println()
 
-	GameField = NewField(GameFieldHeight, GameFieldWidth, GameFieldBlackHoles) // Generated field
-	GameVisibleField = NewField(GameFieldHeight, GameFieldWidth, 0)            // Visible Field
+	GameField = NewField(GameFieldBlackHoles) // Generated field
+	GameVisibleField = NewField(0)            // Visible Field
 
 	fmt.Println()
 	fmt.Println("Debug Game Field")
@@ -178,8 +179,8 @@ func main() {
 	//x := 0
 	//y := 0
 	for i := 0; i < GameFieldClicks; i++ {
-		x := GetRandomInt(GameField.height)
-		y := GetRandomInt(GameField.width)
+		x := GetRandomInt(GameFieldHeight)
+		y := GetRandomInt(GameFieldWidth)
 		fmt.Println()
 		fmt.Println(fmt.Sprintf("Clicked at: %d, %d", x, y))
 		Click(x, y)
