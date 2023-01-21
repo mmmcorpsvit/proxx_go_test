@@ -159,12 +159,13 @@ func SetSurroundingEmptyVisible(cell [][]int, slice []GameVisibleCoord, x, y, dx
 		x+dx < GameFieldHeight && y+dy < GameFieldWidth &&
 		// This is not Black Hole ?
 		cell[x+dx][y+dy] == 0 &&
+		// coord not yet visible ?
 		IndexOf(slice, GameVisibleCoord{x: x + dx, y: y + dy}) == -1 {
 		//cell[x+dx][y+dy]++ // Inc counter
 		GameVisibleField.cell[x+dx][y+dy] = 1
 
 		slice = append(slice, GameVisibleCoord{x: x + dx, y: y + dy})
-		fmt.Println(fmt.Sprintf("debug set %d %d", x+dx, y+dy))
+		fmt.Println(fmt.Sprintf("debug set %d, %d", x+dx, y+dy))
 	}
 
 	return slice
@@ -191,16 +192,15 @@ func Click(x, y int, debug bool) {
 		return
 	}
 
-	//var _ []int
+	f := GameVisibleField.cell
 	var slice = make([]GameVisibleCoord, 0)
-	//var x
 
 	if GameField.cell[y][x] == 0 {
 		// show all empty cells
 		//old_array:= [...]int
 
 		slice = append(slice, GameVisibleCoord{x, y})
-		f := GameVisibleField.cell
+
 		slice = SetSurroundingEmptyVisible(f, slice, x, y, -1, -1)
 		slice = SetSurroundingEmptyVisible(f, slice, x, y, -1, 0)
 		slice = SetSurroundingEmptyVisible(f, slice, x, y, -1, 1)
