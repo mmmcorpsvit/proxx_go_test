@@ -153,6 +153,22 @@ func Display(debug bool) {
 	}
 }
 
+func SetSurroundingEmpty(cell [][]int, x, y, dx, dy int) [][]int {
+	// Check boundaries
+	if x+dx >= 0 && y+dy >= 0 &&
+		x+dx < GameFieldHeight && y+dy < GameFieldWidth &&
+		// This is not Black Hole ?
+		cell[x+dx][y+dy] != -1 {
+		cell[x+dx][y+dy]++ // Inc counter
+	}
+
+	return cell
+}
+
+type GameVisibleCoord struct {
+	x, y int
+}
+
 func Click(x, y int, debug bool) {
 	// if cell already was clicked - ignore
 	if GameVisibleField.cell[y][x] == 1 {
@@ -174,8 +190,16 @@ func Click(x, y int, debug bool) {
 		return
 	}
 
+	//var _ []int
+	var slice = make([]GameVisibleCoord, 0)
+	//var x
+
 	if GameField.cell[y][x] == 0 {
+		// show all empty cells
 		//old_array:= [...]int
+
+		slice = append(slice, GameVisibleCoord{x, y})
+		fmt.Println(slice)
 	}
 
 }
