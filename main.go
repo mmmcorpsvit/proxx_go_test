@@ -155,6 +155,13 @@ func Click(x, y int) {
 
 }
 
+func Bye() {
+	//fmt.Println()
+	//fmt.Println()
+	//fmt.Println("Developed by MMM_Corp, test task special for Data Science UA, 2023")
+	//fmt.Println("Skype: mmm_ogame")
+}
+
 func main() {
 	//fmt.Println("*********************************")
 	//fmt.Println("*            PROXX              *")
@@ -187,8 +194,5 @@ func main() {
 		Display(false)
 	}
 
-	//fmt.Println()
-	//fmt.Println()
-	//fmt.Println("Developed by MMM_Corp, test task special for Data Science UA, 2023")
-	//fmt.Println("Skype: mmm_ogame")
+	defer Bye()
 }
