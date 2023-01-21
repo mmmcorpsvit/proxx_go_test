@@ -14,11 +14,24 @@ type Field struct {
 	//width, height int
 }
 
+//type Config struct {
+//	height int
+//}
+//
+//type Game interface {
+//	Config
+//	NewField()
+//}
+//
+//func r() {
+//	_ = Game{}
+//}
+
 // Game Config
 const (
 	GameFieldHeight     = 4
 	GameFieldWidth      = 4
-	GameFieldBlackHoles = 4
+	GameFieldBlackHoles = 1
 	GameFieldClicks     = 5
 )
 
@@ -140,17 +153,29 @@ func Display(debug bool) {
 	}
 }
 
-func Click(x, y int) {
+func Click(x, y int, debug bool) {
+	// if cell already was clicked - ignore
+	if GameVisibleField.cell[y][x] == 1 {
+		if debug == true {
+			fmt.Println("You already clicked at this point. Just ignore click")
+		}
+		return
+	}
+
 	// do cell visible any way
 	//if GameField.cell[y][x] != 1 {
 	GameVisibleField.cell[y][x] = 1
 	//}
 
 	// click at Black Hole, just write warning
-	if GameField.cell[y][x] == -1 {
+	if GameField.cell[y][x] == -1 && debug == false {
 		fmt.Println("You click at Black Hole. Game Over!")
 		os.Exit(0)
 		return
+	}
+
+	if GameField.cell[y][x] == 0 {
+		//old_array:= [...]int
 	}
 
 }
@@ -190,7 +215,7 @@ func main() {
 		y := GetRandomInt(GameFieldWidth)
 		fmt.Println()
 		fmt.Println(fmt.Sprintf("Clicked at: %d, %d", x, y))
-		Click(x, y)
+		Click(x, y, false)
 		Display(false)
 	}
 
