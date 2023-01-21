@@ -1,56 +1,193 @@
 package main
 
 import (
+	"crypto/rand"
 	"fmt"
+	"math/big"
+	"os"
+	"strings"
 )
 
 // Field represents a two-dimensional field of cells.
 type Field struct {
-	s    [][]int
-	w, h int
+	cell          [][]int
+	width, height int
 }
 
-func NewField(h, w, k int) *Field {
-	// TODO: add validator
+// Game Config
+const (
+	GameFieldHeight     = 4
+	GameFieldWidth      = 4
+	GameFieldBlackHoles = 4
+	GameFieldClicks     = 5
+)
+
+var (
+	GameVisibleField *Field
+	GameField        *Field
+)
+
+func GetRandomInt(value int) int {
+	nBig, err := rand.Int(rand.Reader, big.NewInt(int64(value)))
+	if err != nil {
+		panic(err)
+	}
+	n := nBig.Int64()
+	return int(n)
+}
+
+func SetSurrounding(cell [][]int, x, y, dx, dy, height, width int) [][]int {
+	// Check boundaries
+	if x+dx >= 0 && y+dy >= 0 &&
+		x+dx < height && y+dy < width &&
+		// This is not Black Hole ?
+		cell[x+dx][y+dy] != -1 {
+		cell[x+dx][y+dy]++ // Inc counter
+	}
+
+	return cell
+}
+
+func NewField(height, width, blackHolesCount int) *Field {
+	// TODO: add validator, h>2, w>2, black_holes_count > 0
 	// TODO: check math lib to create matrix
 	// https://stackoverflow.com/questions/39804861/what-is-a-concise-way-to-create-a-2d-slice-in-go
-	s := make([][]int, h)
-	for i := range s {
-		s[i] = make([]int, w)
+	f := make([][]int, width)
+	for i := range f {
+		f[i] = make([]int, height)
 	}
-	return &Field{s: s, w: w, h: h}
+
+	// add Black Holes
+	blackHolesCounter := 0
+	x := 0
+	y := 0
+	for blackHolesCounter < blackHolesCount {
+		x = GetRandomInt(width)
+		y = GetRandomInt(height)
+
+		// update only this not Black Hole cell
+		if f[x][y] != -1 {
+			f[x][y] = -1 // There Black Hole
+			blackHolesCounter++
+		}
+	}
+
+	// compute cells
+	for x := 0; x < width; x++ {
+		for y := 0; y < height; y++ {
+			if f[x][y] == -1 {
+				SetSurrounding(f, x, y, -1, -1, width, height)
+				SetSurrounding(f, x, y, -1, 0, width, height)
+				SetSurrounding(f, x, y, -1, 1, width, height)
+
+				SetSurrounding(f, x, y, 1, -1, width, height)
+				SetSurrounding(f, x, y, 1, 0, width, height)
+				SetSurrounding(f, x, y, 1, 1, width, height)
+
+				SetSurrounding(f, x, y, 0, -1, width, height)
+				SetSurrounding(f, x, y, 0, 1, width, height)
+			}
+		}
+	}
+
+	return &Field{cell: f, width: width, height: height}
 }
 
-func PrintField(f *Field) {
-	for i := 0; i < f.h; i++ {
-		for k := 0; k < f.w; k++ {
+func Display(debug bool) {
+	fmt.Print("   ")
+	for x := 0; x < GameField.height; x++ {
+		fmt.Print(x)
+		fmt.Print("  ")
+	}
+	fmt.Println()
+
+	fmt.Print("   ")
+	for x := 0; x < GameField.height; x++ {
+		fmt.Print("-")
+		fmt.Print("  ")
+	}
+	fmt.Println()
+
+	for x := 0; x < GameField.width; x++ {
+		s := ""
+		for y := 0; y < GameField.height; y++ {
 			// TODO: do better output
 			//fmt.Print(strconv.FormatInt(int64(f.s[i][k]), 10) + "   ")
-			fmt.Print(fmt.Sprintf("%d   ", f.s[i][k]))
+			//value := 0
+			//value = f.cell[x][y]
+			v := "   "
+			if debug == true || (debug == false && GameVisibleField.cell[x][y] == 1) {
+				v = strings.Replace(
+					fmt.Sprintf("%d  ", GameField.cell[x][y]), "-1", "H", -1)
+			}
+
+			//if debug == true {
+			//	v = strings.Replace(
+			//		fmt.Sprintf("%d  ", GameField.cell[x][y]), "-1", "H", -1)
+			//}
+
+			//else {
+			//	v = "  "
+			//}
+
+			s = s + v
 		}
-		fmt.Println()
+		// fmt.Print( x + "ddd" + s)
+		fmt.Print(x)
+		fmt.Print("| ")
+		fmt.Println(s)
 	}
 }
 
-// String returns the game board as a string.
-//func (l *Life) String() string {
-//	var buf bytes.Buffer
-//	for y := 0; y < l.h; y++ {
-//		for x := 0; x < l.w; x++ {
-//			b := byte(' ')
-//			if l.a.Alive(x, y) {
-//				b = '*'
-//			}
-//			buf.WriteByte(b)
-//		}
-//		buf.WriteByte('\n')
-//	}
-//	return buf.String()
-//}
+func Click(x, y int) {
+	// do cell visible any way
+	//if GameField.cell[y][x] != 1 {
+	GameVisibleField.cell[y][x] = 1
+	//}
+
+	// click at Black Hole, just write warning
+	if GameField.cell[y][x] == -1 {
+		fmt.Println("You click at Black Hole. Game Over!")
+		os.Exit(0)
+		return
+	}
+
+}
 
 func main() {
-	data := NewField(10, 10, 5)
-	PrintField(data)
-	//_ = data
-	//fmt.Println("Hello, 世界")
+	//fmt.Println("*********************************")
+	//fmt.Println("*            PROXX              *")
+	//fmt.Println("*                               *")
+	//fmt.Println("* Legend:                       *")
+	//fmt.Println("*    H   - Black Hole           *")
+	//fmt.Println("*    0   - Visible Cell         *")
+	//fmt.Println("*        - Hidden Cell          *")
+	//fmt.Println("*    1-8 - Surrounding Cell     *")
+	//fmt.Println("*********************************")
+	//fmt.Println()
+
+	GameField = NewField(GameFieldHeight, GameFieldWidth, GameFieldBlackHoles) // Generated field
+	GameVisibleField = NewField(GameFieldHeight, GameFieldWidth, 0)            // Visible Field
+
+	fmt.Println()
+	fmt.Println("Debug Game Field")
+	Display(true)
+	fmt.Println()
+	fmt.Println("Simulate few clicks at random places")
+
+	//x := 0
+	//y := 0
+	for i := 0; i < GameFieldClicks; i++ {
+		x := GetRandomInt(GameField.height)
+		y := GetRandomInt(GameField.width)
+		fmt.Println()
+		fmt.Println(fmt.Sprintf("Clicked at: %d, %d", x, y))
+		Click(x, y)
+		Display(false)
+	}
+
+	//fmt.Println()
+	//fmt.Println()
+	//fmt.Println("Developed by MMM_Corp, test task special for Data Science UA, 2023")
+	//fmt.Println("Skype: mmm_ogame")
 }
