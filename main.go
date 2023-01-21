@@ -14,19 +14,6 @@ type Field struct {
 	//width, height int
 }
 
-//type Config struct {
-//	height int
-//}
-//
-//type Game interface {
-//	Config
-//	NewField()
-//}
-//
-//func r() {
-//	_ = Game{}
-//}
-
 // Game Config
 const (
 	GameFieldHeight     = 4
@@ -153,20 +140,34 @@ func Display(debug bool) {
 	}
 }
 
-func SetSurroundingEmpty(cell [][]int, x, y, dx, dy int) [][]int {
+type GameVisibleCoord struct {
+	x, y int
+}
+
+func IndexOf[T comparable](collection []T, el T) int {
+	for i, x := range collection {
+		if x == el {
+			return i
+		}
+	}
+	return -1
+}
+
+func SetSurroundingEmptyVisible(cell [][]int, slice []GameVisibleCoord, x, y, dx, dy int) []GameVisibleCoord {
 	// Check boundaries
 	if x+dx >= 0 && y+dy >= 0 &&
 		x+dx < GameFieldHeight && y+dy < GameFieldWidth &&
 		// This is not Black Hole ?
-		cell[x+dx][y+dy] != -1 {
-		cell[x+dx][y+dy]++ // Inc counter
+		cell[x+dx][y+dy] == 0 &&
+		IndexOf(slice, GameVisibleCoord{x: x + dx, y: y + dy}) == -1 {
+		//cell[x+dx][y+dy]++ // Inc counter
+		GameVisibleField.cell[x+dx][y+dy] = 1
+
+		slice = append(slice, GameVisibleCoord{x: x + dx, y: y + dy})
+		fmt.Println(fmt.Sprintf("debug set %d %d", x+dx, y+dy))
 	}
 
-	return cell
-}
-
-type GameVisibleCoord struct {
-	x, y int
+	return slice
 }
 
 func Click(x, y int, debug bool) {
@@ -199,17 +200,29 @@ func Click(x, y int, debug bool) {
 		//old_array:= [...]int
 
 		slice = append(slice, GameVisibleCoord{x, y})
+		f := GameVisibleField.cell
+		slice = SetSurroundingEmptyVisible(f, slice, x, y, -1, -1)
+		slice = SetSurroundingEmptyVisible(f, slice, x, y, -1, 0)
+		slice = SetSurroundingEmptyVisible(f, slice, x, y, -1, 1)
+
+		slice = SetSurroundingEmptyVisible(f, slice, x, y, 1, -1)
+		slice = SetSurroundingEmptyVisible(f, slice, x, y, 1, 0)
+		slice = SetSurroundingEmptyVisible(f, slice, x, y, 1, 1)
+
+		slice = SetSurroundingEmptyVisible(f, slice, x, y, 0, -1)
+		slice = SetSurroundingEmptyVisible(f, slice, x, y, 0, 1)
+
 		fmt.Println(slice)
 	}
 
 }
 
-func Bye() {
-	//fmt.Println()
-	//fmt.Println()
-	//fmt.Println("Developed by MMM_Corp, test task special for Data Science UA, 2023")
-	//fmt.Println("Skype: mmm_ogame")
-}
+//func Bye() {
+//	fmt.Println()
+//	fmt.Println()
+//	fmt.Println("Developed by MMM_Corp, test task special for Data Science UA, 2023")
+//	fmt.Println("Skype: mmm_ogame")
+//}
 
 func main() {
 	//fmt.Println("*********************************")
@@ -243,5 +256,5 @@ func main() {
 		Display(false)
 	}
 
-	defer Bye()
+	//defer Bye()
 }
