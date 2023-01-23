@@ -278,7 +278,7 @@ func main() {
 		Display(false)
 	}
 
-	_ = 1
+	//_ = 1
 	fmt.Println(GameFieldVisible)
 	//defer Bye()
 }
