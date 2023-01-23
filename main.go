@@ -11,9 +11,9 @@ import (
 // Game Config
 const (
 	GameFieldWidth      = 10
-	GameFieldHeight     = 6
+	GameFieldHeight     = 5
 	GameFieldBlackHoles = 3
-	GameFieldClicks     = 3
+	GameFieldClicks     = 2
 )
 
 // Field represents a two-dimensional field of cells.
@@ -37,12 +37,13 @@ func GetRandomInt(value int) int {
 }
 
 func SetSurrounding(cell [][]int, x, y, dx, dy int) {
-	// Check boundaries
-	if x+dx >= 0 && y+dy >= 0 &&
-		x+dx < GameFieldHeight && y+dy < GameFieldWidth &&
+	dx = x + dx
+	dy = y + dy
+	if dx >= 0 && dy >= 0 && // Check boundaries
+		dx < GameFieldHeight && dy < GameFieldWidth &&
 		// This is not Black Hole ?
-		cell[x+dx][y+dy] != -1 {
-		cell[x+dx][y+dy]++ // Inc cell counter
+		cell[dx][dy] != -1 {
+		cell[dx][dy]++ // Inc cell counter
 	}
 }
 
@@ -149,19 +150,41 @@ func IndexOf[T comparable](collection []T, el T) int {
 	return -1
 }
 
-func SetSurroundingEmptyVisible(cell [][]int, slice []GameVisibleCoord, x, y, dx, dy int) []GameVisibleCoord {
-	// Check boundaries
-	if x+dx >= 0 && y+dy >= 0 &&
-		x+dx < GameFieldWidth && y+dy < GameFieldHeight &&
-		// This is not Black Hole ?
-		cell[x+dx][y+dy] != -1 &&
-		// coord not yet visible ?
-		IndexOf(slice, GameVisibleCoord{x: x + dx, y: y + dy}) == -1 {
-		//cell[x+dx][y+dy]++ // Inc counter
-		GameFieldVisible.cell[x+dx][y+dy] = 1
-		Click(x+dx, y+dy, true) // recurse, but can be another way - use shift slice for loop
+//func SetSurroundingEmptyVisible(cell [][]int, slice []GameVisibleCoord, x, y, dx, dy int) []GameVisibleCoord {
+//	dx = x + dx
+//	// Check boundaries
+//	if x+dx >= 0 && y+dy >= 0 &&
+//		x+dx < GameFieldHeight && y+dy < GameFieldWidth &&
+//		// This is not Black Hole ?
+//		cell[x+dx][y+dy] != -1 &&
+//		// coord not yet visible ?
+//		IndexOf(slice, GameVisibleCoord{x: x + dx, y: y + dy}) == -1 {
+//		//cell[x+dx][y+dy]++ // Inc counter
+//		GameFieldVisible.cell[x+dx][y+dy] = 1
+//		Click(x+dx, y+dy, true) // recurse, but can be another way - use shift slice for loop
+//
+//		slice = append(slice, GameVisibleCoord{x: x + dx, y: y + dy})
+//		//fmt.Println(fmt.Sprintf("debug set %d, %d", x+dx, y+dy))
+//	}
+//
+//	return slice
+//}
 
-		slice = append(slice, GameVisibleCoord{x: x + dx, y: y + dy})
+func SetSurroundingEmptyVisible(cell [][]int, slice []GameVisibleCoord, x, y, dx, dy int) []GameVisibleCoord {
+	dx = x + dx
+	dy = y + dy
+	// Check boundaries
+	if dx >= 0 && dy >= 0 &&
+		dx < GameFieldHeight && dy < GameFieldWidth &&
+		// This is not Black Hole ?
+		cell[dx][dy] != -1 &&
+		// coord not yet visible ?
+		IndexOf(slice, GameVisibleCoord{x: dx, y: dy}) == -1 {
+		//cell[x+dx][y+dy]++ // Inc counter
+		GameFieldVisible.cell[dx][dy] = 1
+		//Click(dx, dy, true) // recurse, but can be another way - use shift slice for loop
+
+		slice = append(slice, GameVisibleCoord{x: dx, y: dy})
 		//fmt.Println(fmt.Sprintf("debug set %d, %d", x+dx, y+dy))
 	}
 
@@ -170,7 +193,7 @@ func SetSurroundingEmptyVisible(cell [][]int, slice []GameVisibleCoord, x, y, dx
 
 func Click(x, y int, debug bool) {
 	// if cell already was clicked - ignore
-	if GameFieldVisible.cell[y][x] == 1 {
+	if GameFieldVisible.cell[x][y] == 1 {
 		if debug == true {
 			//fmt.Println("You already clicked at this point. Just ignore click")
 		}
@@ -179,11 +202,11 @@ func Click(x, y int, debug bool) {
 
 	// do cell visible any way
 	//if GameField.cell[y][x] != 1 {
-	GameFieldVisible.cell[y][x] = 1
+	GameFieldVisible.cell[x][y] = 1
 	//}
 
 	// click at Black Hole, just write warning
-	if GameField.cell[y][x] == -1 && debug == false {
+	if GameField.cell[x][y] == -1 && debug == false {
 		fmt.Println("You click at Black Hole. Game Over!")
 		os.Exit(0)
 		return
@@ -192,7 +215,7 @@ func Click(x, y int, debug bool) {
 	f := GameFieldVisible.cell
 	var slice = make([]GameVisibleCoord, 0)
 
-	if GameField.cell[y][x] == 0 {
+	if GameField.cell[x][y] == 0 {
 		// show all empty cells
 		//old_array:= [...]int
 
@@ -231,8 +254,7 @@ func main() {
 	//fmt.Println("*    0   - Visible Cell         *")
 	//fmt.Println("*        - Hidden Cell          *")
 	//fmt.Println("*    1-8 - Surrounding Cell     *")
-	//fmt.Println("*********************************")
-	//fmt.Println()
+	//fmt.Println("*********************************\n")
 
 	if //goland:noinspection ALL
 	GameFieldBlackHoles > GameFieldWidth*GameFieldHeight {
@@ -243,24 +265,20 @@ func main() {
 	GameField = NewField(GameFieldBlackHoles) // Generated field
 	GameFieldVisible = NewField(0)            // Visible Field
 
-	fmt.Println()
-	fmt.Println("Generated Game Field")
+	fmt.Println("\nGenerated Game Field")
 	Display(true)
-	fmt.Println()
-	fmt.Println("Simulate few clicks at random places")
+	fmt.Println("\nSimulate few clicks at random places")
 
-	//x := 0
-	//y := 0
-	//for i := 0; i < GameFieldClicks; i++ {
-	//	x := GetRandomInt(GameFieldHeight)
-	//	y := GetRandomInt(GameFieldWidth)
-	//	fmt.Println()
-	//	fmt.Println(fmt.Sprintf("Clicked at: %d, %d", x, y))
-	//	Click(x, y, false)
-	//	Display(false)
-	//}
+	for i := 0; i < GameFieldClicks; i++ {
+		y := GetRandomInt(GameFieldHeight)
+		x := GetRandomInt(GameFieldWidth)
+		fmt.Println()
+		fmt.Printf("Clicked at: %d, %d \n", x, y)
+		Click(y, x, false)
+		Display(false)
+	}
 
 	_ = 1
-	fmt.Println()
+	fmt.Println(GameFieldVisible)
 	//defer Bye()
 }
