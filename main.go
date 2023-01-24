@@ -20,16 +20,16 @@ type ShiftCoordinateElement struct {
 }
 
 var ShiftCoordinate = [...]ShiftCoordinateElement{
-	ShiftCoordinateElement{x: -1, y: -1},
-	ShiftCoordinateElement{x: -1, y: 0},
-	ShiftCoordinateElement{x: -1, y: 1},
+	{x: -1, y: -1},
+	{x: -1, y: 0},
+	{x: -1, y: 1},
 
-	ShiftCoordinateElement{x: 1, y: -1},
-	ShiftCoordinateElement{x: 1, y: 0},
-	ShiftCoordinateElement{x: 1, y: 1},
+	{x: 1, y: -1},
+	{x: 1, y: 0},
+	{x: 1, y: 1},
 
-	ShiftCoordinateElement{x: 0, y: -1},
-	ShiftCoordinateElement{x: 0, y: 1},
+	{x: 0, y: -1},
+	{x: 0, y: 1},
 }
 
 // Field represents a two-dimensional field of cells.
