@@ -13,7 +13,7 @@ const (
 	GameFieldWidth      = 10
 	GameFieldHeight     = 5
 	GameFieldBlackHoles = 3
-	GameFieldClicks     = 2
+	GameFieldClicks     = 1
 )
 
 // Field represents a two-dimensional field of cells.
@@ -171,34 +171,52 @@ func IndexOf[T comparable](collection []T, el T) int {
 //}
 
 func SetSurroundingEmptyVisible(cell [][]int, slice []GameVisibleCoord, x, y, dx, dy int) []GameVisibleCoord {
+	//func SetSurroundingEmptyVisible(cell [][]int, x, y, dx, dy int) {
 	dx = x + dx
 	dy = y + dy
+
 	// Check boundaries
 	if dx >= 0 && dy >= 0 &&
 		dx < GameFieldHeight && dy < GameFieldWidth &&
 		// This is not Black Hole ?
-		cell[dx][dy] != -1 &&
+		cell[dx][dy] != -1 {
+
 		// coord not yet visible ?
-		IndexOf(slice, GameVisibleCoord{x: dx, y: dy}) == -1 {
+		//if IndexOf(slice, GameVisibleCoord{y: dx, x: dy}) == -1 {
+		fmt.Printf("debug SetSurroundingEmptyVisible set %d, %d\n", dy, dx)
 		//cell[x+dx][y+dy]++ // Inc counter
 		GameFieldVisible.cell[dx][dy] = 1
 		//Click(dx, dy, true) // recurse, but can be another way - use shift slice for loop
 
-		slice = append(slice, GameVisibleCoord{x: dx, y: dy})
-		//fmt.Println(fmt.Sprintf("debug set %d, %d", x+dx, y+dy))
+		//slice = append(slice, GameVisibleCoord{y: dx, x: dy})
+		//fmt.Printf("debug set %d, %d\n", dy, dx)
+		//}
 	}
 
 	return slice
 }
 
 func Click(x, y int, debug bool) {
+	f := GameFieldVisible.cell
+
+	//if GameField.cell[y][x] == 0 {
+	//	if debug == true {
+	//		var slice = make([]GameVisibleCoord, 0)
+	//		//fmt.Println("You already clicked at this point. Just ignore click")
+	//		SetSurroundingEmptyVisible(f, slice, x, y, 0, 0)
+	//	}
+	//	return
+	//}
+
+	//fmt.Printf("debug Click set %d, %d\n", y, x)
+
 	// if cell already was clicked - ignore
-	if GameFieldVisible.cell[x][y] == 1 {
-		if debug == true {
-			//fmt.Println("You already clicked at this point. Just ignore click")
-		}
-		return
-	}
+	//if GameFieldVisible.cell[x][y] == 1 {
+	//	if debug == true {
+	//		//fmt.Println("You already clicked at this point. Just ignore click")
+	//	}
+	//	return
+	//}
 
 	// do cell visible any way
 	//if GameField.cell[y][x] != 1 {
@@ -212,14 +230,13 @@ func Click(x, y int, debug bool) {
 		return
 	}
 
-	f := GameFieldVisible.cell
 	var slice = make([]GameVisibleCoord, 0)
 
 	if GameField.cell[x][y] == 0 {
 		// show all empty cells
 		//old_array:= [...]int
 
-		slice = append(slice, GameVisibleCoord{x, y})
+		//slice = append(slice, GameVisibleCoord{y, x})
 
 		slice = SetSurroundingEmptyVisible(f, slice, x, y, -1, -1)
 		slice = SetSurroundingEmptyVisible(f, slice, x, y, -1, 0)
@@ -232,8 +249,8 @@ func Click(x, y int, debug bool) {
 		slice = SetSurroundingEmptyVisible(f, slice, x, y, 0, -1)
 		slice = SetSurroundingEmptyVisible(f, slice, x, y, 0, 1)
 
-		//fmt.Println(slice)
-		return
+		fmt.Println(slice)
+		//return
 	}
 
 }
@@ -279,6 +296,6 @@ func main() {
 	}
 
 	//_ = 1
-	fmt.Println(GameFieldVisible)
+	//fmt.Println(GameFieldVisible)
 	//defer Bye()
 }
