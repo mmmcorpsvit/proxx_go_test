@@ -8,13 +8,29 @@ import (
 	"strings"
 )
 
-// Game Config
 const (
 	GameFieldWidth      = 10
-	GameFieldHeight     = 5
-	GameFieldBlackHoles = 3
+	GameFieldHeight     = 10
+	GameFieldBlackHoles = 5
 	GameFieldClicks     = 1
 )
+
+type ShiftCoordinateElement struct {
+	x, y int
+}
+
+var ShiftCoordinate = [...]ShiftCoordinateElement{
+	ShiftCoordinateElement{x: -1, y: -1},
+	ShiftCoordinateElement{x: -1, y: 0},
+	ShiftCoordinateElement{x: -1, y: 1},
+
+	ShiftCoordinateElement{x: 1, y: -1},
+	ShiftCoordinateElement{x: 1, y: 0},
+	ShiftCoordinateElement{x: 1, y: 1},
+
+	ShiftCoordinateElement{x: 0, y: -1},
+	ShiftCoordinateElement{x: 0, y: 1},
+}
 
 // Field represents a two-dimensional field of cells.
 type Field struct {
@@ -72,16 +88,9 @@ func NewField(gameFieldBlackHoles int) *Field {
 				blackHolesCounter++
 
 				// compute cells
-				SetSurrounding(f, x, y, -1, -1)
-				SetSurrounding(f, x, y, -1, 0)
-				SetSurrounding(f, x, y, -1, 1)
-
-				SetSurrounding(f, x, y, 1, -1)
-				SetSurrounding(f, x, y, 1, 0)
-				SetSurrounding(f, x, y, 1, 1)
-
-				SetSurrounding(f, x, y, 0, -1)
-				SetSurrounding(f, x, y, 0, 1)
+				for _, element := range ShiftCoordinate {
+					SetSurrounding(f, x, y, element.x, element.y)
+				}
 			}
 		}
 
@@ -170,7 +179,7 @@ func IndexOf[T comparable](collection []T, el T) int {
 //	return slice
 //}
 
-func SetSurroundingEmptyVisible(cell [][]int, slice []GameVisibleCoord, x, y, dx, dy int) []GameVisibleCoord {
+func SetSurroundingEmptyVisible(cell [][]int, slice []GameVisibleCoord, realClick bool, x, y, dx, dy int) []GameVisibleCoord {
 	//func SetSurroundingEmptyVisible(cell [][]int, x, y, dx, dy int) {
 	dx = x + dx
 	dy = y + dy
@@ -186,7 +195,10 @@ func SetSurroundingEmptyVisible(cell [][]int, slice []GameVisibleCoord, x, y, dx
 		fmt.Printf("debug SetSurroundingEmptyVisible set %d, %d\n", dy, dx)
 		//cell[x+dx][y+dy]++ // Inc counter
 		GameFieldVisible.cell[dx][dy] = 1
-		//Click(dx, dy, true) // recurse, but can be another way - use shift slice for loop
+
+		if realClick == false {
+			Click(dx, dy, false) // recurse, but can be another way - use shift slice for loop
+		}
 
 		//slice = append(slice, GameVisibleCoord{y: dx, x: dy})
 		//fmt.Printf("debug set %d, %d\n", dy, dx)
@@ -196,11 +208,10 @@ func SetSurroundingEmptyVisible(cell [][]int, slice []GameVisibleCoord, x, y, dx
 	return slice
 }
 
-func Click(x, y int, debug bool) {
-	f := GameFieldVisible.cell
+func Click(x, y int, realClick bool) {
 
 	//if GameField.cell[y][x] == 0 {
-	//	if debug == true {
+	//	if real_click == true {
 	//		var slice = make([]GameVisibleCoord, 0)
 	//		//fmt.Println("You already clicked at this point. Just ignore click")
 	//		SetSurroundingEmptyVisible(f, slice, x, y, 0, 0)
@@ -208,46 +219,44 @@ func Click(x, y int, debug bool) {
 	//	return
 	//}
 
-	//fmt.Printf("debug Click set %d, %d\n", y, x)
+	//fmt.Printf("real_click Click set %d, %d\n", y, x)
 
 	// if cell already was clicked - ignore
 	//if GameFieldVisible.cell[x][y] == 1 {
-	//	if debug == true {
+	//	if real_click == true {
 	//		//fmt.Println("You already clicked at this point. Just ignore click")
 	//	}
 	//	return
 	//}
 
 	// do cell visible any way
-	//if GameField.cell[y][x] != 1 {
+	//if realClick == true {
 	GameFieldVisible.cell[x][y] = 1
+	//}
+	//if real_click == true {
+	//	GameFieldVisible.cell[x][y] = 1
 	//}
 
 	// click at Black Hole, just write warning
-	if GameField.cell[x][y] == -1 && debug == false {
+	if GameField.cell[x][y] == -1 && realClick == true {
 		fmt.Println("You click at Black Hole. Game Over!")
 		os.Exit(0)
 		return
 	}
 
-	var slice = make([]GameVisibleCoord, 0)
-
-	if GameField.cell[x][y] == 0 {
+	if (GameField.cell[x][y] == 0 && realClick == true) || (realClick == false && GameField.cell[x][y] > 0) {
+		//if GameField.cell[x][y] == 0 && realClick == true {
 		// show all empty cells
 		//old_array:= [...]int
 
 		//slice = append(slice, GameVisibleCoord{y, x})
+		var slice = make([]GameVisibleCoord, 0)
+		f := GameFieldVisible.cell
 
-		slice = SetSurroundingEmptyVisible(f, slice, x, y, -1, -1)
-		slice = SetSurroundingEmptyVisible(f, slice, x, y, -1, 0)
-		slice = SetSurroundingEmptyVisible(f, slice, x, y, -1, 1)
-
-		slice = SetSurroundingEmptyVisible(f, slice, x, y, 1, -1)
-		slice = SetSurroundingEmptyVisible(f, slice, x, y, 1, 0)
-		slice = SetSurroundingEmptyVisible(f, slice, x, y, 1, 1)
-
-		slice = SetSurroundingEmptyVisible(f, slice, x, y, 0, -1)
-		slice = SetSurroundingEmptyVisible(f, slice, x, y, 0, 1)
+		for _, element := range ShiftCoordinate {
+			//SetSurrounding(f, x, y, element.x, element.y)
+			slice = SetSurroundingEmptyVisible(f, slice, realClick, x, y, element.x, element.y)
+		}
 
 		fmt.Println(slice)
 		//return
@@ -291,7 +300,7 @@ func main() {
 		x := GetRandomInt(GameFieldWidth)
 		fmt.Println()
 		fmt.Printf("Clicked at: %d, %d \n", x, y)
-		Click(y, x, false)
+		Click(y, x, true)
 		Display(false)
 	}
 
