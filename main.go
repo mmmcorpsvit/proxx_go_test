@@ -184,6 +184,8 @@ func SetSurroundingEmptyVisible(cell [][]int, slice []GameVisibleCoord, realClic
 	dx = x + dx
 	dy = y + dy
 
+	fmt.Println("********************")
+
 	// Check boundaries
 	if dx >= 0 && dy >= 0 &&
 		dx < GameFieldHeight && dy < GameFieldWidth &&
@@ -196,7 +198,9 @@ func SetSurroundingEmptyVisible(cell [][]int, slice []GameVisibleCoord, realClic
 		//cell[x+dx][y+dy]++ // Inc counter
 		GameFieldVisible.cell[dx][dy] = 1
 
-		if realClick == false {
+		//if realClick == false {
+		if cell[dx][dy] == 0 {
+			fmt.Printf("debug CELL CLICK  %d, %d\n", dy, dx)
 			Click(dx, dy, false) // recurse, but can be another way - use shift slice for loop
 		}
 
@@ -209,6 +213,24 @@ func SetSurroundingEmptyVisible(cell [][]int, slice []GameVisibleCoord, realClic
 }
 
 func Click(x, y int, realClick bool) {
+	fmt.Printf("DEBUG Click set %d, %d\n", y, x)
+
+	if GameFieldVisible.cell[x][y] == 1 && realClick == true {
+		fmt.Printf("You already do Click, ignoring... %d, %d\n", y, x)
+		return
+	}
+
+	if GameField.cell[x][y] > 0 {
+		GameFieldVisible.cell[x][y] = 1
+		return
+	}
+
+	// click at Black Hole, just write warning
+	if GameField.cell[x][y] == -1 && realClick == true {
+		fmt.Println("You click at Black Hole. Game Over!")
+		os.Exit(0)
+		return
+	}
 
 	//if GameField.cell[y][x] == 0 {
 	//	if real_click == true {
@@ -218,8 +240,6 @@ func Click(x, y int, realClick bool) {
 	//	}
 	//	return
 	//}
-
-	//fmt.Printf("real_click Click set %d, %d\n", y, x)
 
 	// if cell already was clicked - ignore
 	//if GameFieldVisible.cell[x][y] == 1 {
@@ -231,27 +251,21 @@ func Click(x, y int, realClick bool) {
 
 	// do cell visible any way
 	//if realClick == true {
-	GameFieldVisible.cell[x][y] = 1
+	//	GameFieldVisible.cell[x][y] = 1
 	//}
 	//if real_click == true {
 	//	GameFieldVisible.cell[x][y] = 1
 	//}
 
-	// click at Black Hole, just write warning
-	if GameField.cell[x][y] == -1 && realClick == true {
-		fmt.Println("You click at Black Hole. Game Over!")
-		os.Exit(0)
-		return
-	}
-
-	if (GameField.cell[x][y] == 0 && realClick == true) || (realClick == false && GameField.cell[x][y] > 0) {
+	if (GameField.cell[x][y] == 0 && realClick == true) || (realClick == false && GameFieldVisible.cell[x][y] == 0) {
 		//if GameField.cell[x][y] == 0 && realClick == true {
 		// show all empty cells
 		//old_array:= [...]int
+		GameFieldVisible.cell[x][y] = 1
 
 		//slice = append(slice, GameVisibleCoord{y, x})
 		var slice = make([]GameVisibleCoord, 0)
-		f := GameFieldVisible.cell
+		f := GameField.cell
 
 		for _, element := range ShiftCoordinate {
 			//SetSurrounding(f, x, y, element.x, element.y)
