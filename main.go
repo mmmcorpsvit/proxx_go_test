@@ -234,31 +234,6 @@ func Click(x, y int, realClick bool) {
 		return
 	}
 
-	//if GameField.cell[y][x] == 0 {
-	//	if real_click == true {
-	//		var slice = make([]GameVisibleCoord, 0)
-	//		//fmt.Println("You already clicked at this point. Just ignore click")
-	//		SetSurroundingEmptyVisible(f, slice, x, y, 0, 0)
-	//	}
-	//	return
-	//}
-
-	// if cell already was clicked - ignore
-	//if GameFieldVisible.cell[x][y] == 1 {
-	//	if real_click == true {
-	//		//fmt.Println("You already clicked at this point. Just ignore click")
-	//	}
-	//	return
-	//}
-
-	// do cell visible any way
-	//if realClick == true {
-	//	GameFieldVisible.cell[x][y] = 1
-	//}
-	//if real_click == true {
-	//	GameFieldVisible.cell[x][y] = 1
-	//}
-
 	if (GameField.cell[x][y] == 0 && realClick == true) || (realClick == false && GameFieldVisible.cell[x][y] == 0) {
 		//if GameField.cell[x][y] == 0 && realClick == true {
 		// show all empty cells
