@@ -215,17 +215,19 @@ func SetSurroundingEmptyVisible(cell [][]int, slice []GameVisibleCoord, realClic
 func Click(x, y int, realClick bool) {
 	fmt.Printf("DEBUG Click set %d, %d\n", y, x)
 
+	// cell already was clicked, ignore click and show message
 	if GameFieldVisible.cell[x][y] == 1 && realClick == true {
 		fmt.Printf("You already do Click, ignoring... %d, %d\n", y, x)
 		return
 	}
 
+	// number cell, show
 	if GameField.cell[x][y] > 0 {
 		GameFieldVisible.cell[x][y] = 1
 		return
 	}
 
-	// click at Black Hole, just write warning
+	// Black Hole cell, just write warning and break app
 	if GameField.cell[x][y] == -1 && realClick == true {
 		fmt.Println("You click at Black Hole. Game Over!")
 		os.Exit(0)
