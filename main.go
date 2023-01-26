@@ -194,18 +194,18 @@ func SetSurroundingEmptyVisible(cell [][]int, slice []GameVisibleCoord, realClic
 
 		// coord not yet visible ?
 		//if IndexOf(slice, GameVisibleCoord{y: dx, x: dy}) == -1 {
-		fmt.Printf("debug SetSurroundingEmptyVisible set %d, %d\n", dy, dx)
+		fmt.Printf("debug SetSurroundingEmptyVisible set %d, %d", dy, dx)
 		//cell[x+dx][y+dy]++ // Inc counter
 		GameFieldVisible.cell[dx][dy] = 1
 
 		//if realClick == false {
 		if cell[dx][dy] == 0 {
-			fmt.Printf("debug CELL CLICK  %d, %d\n", dy, dx)
+			fmt.Printf("debug CELL CLICK  %d, %d", dy, dx)
 			Click(dx, dy, false) // recurse, but can be another way - use shift slice for loop
 		}
 
 		//slice = append(slice, GameVisibleCoord{y: dx, x: dy})
-		//fmt.Printf("debug set %d, %d\n", dy, dx)
+		//fmt.Printf("debug set %d, %d", dy, dx)
 		//}
 	}
 
@@ -213,11 +213,11 @@ func SetSurroundingEmptyVisible(cell [][]int, slice []GameVisibleCoord, realClic
 }
 
 func Click(x, y int, realClick bool) {
-	fmt.Printf("DEBUG Click set %d, %d\n", y, x)
+	fmt.Printf("DEBUG Click set %d, %d", y, x)
 
 	// cell already was clicked, ignore click and show message
 	if GameFieldVisible.cell[x][y] == 1 && realClick == true {
-		fmt.Printf("You already do Click, ignoring... %d, %d\n", y, x)
+		fmt.Printf("You already do Click, ignoring... %d, %d", y, x)
 		return
 	}
 
@@ -234,24 +234,73 @@ func Click(x, y int, realClick bool) {
 		return
 	}
 
-	if (GameField.cell[x][y] == 0 && realClick == true) || (realClick == false && GameFieldVisible.cell[x][y] == 0) {
-		//if GameField.cell[x][y] == 0 && realClick == true {
-		// show all empty cells
-		//old_array:= [...]int
-		GameFieldVisible.cell[x][y] = 1
-
-		//slice = append(slice, GameVisibleCoord{y, x})
+	if GameField.cell[x][y] == 0 {
 		var slice = make([]GameVisibleCoord, 0)
-		f := GameField.cell
+		//first_run := true
+		slice = append(slice, GameVisibleCoord{y, x})
+		//oldLen := len(slice)
 
-		for _, element := range ShiftCoordinate {
-			//SetSurrounding(f, x, y, element.x, element.y)
-			slice = SetSurroundingEmptyVisible(f, slice, realClick, x, y, element.x, element.y)
+		//GameFieldVisible.cell[x][y] = 1
+
+		for len(slice) > 0 {
+			fmt.Println(slice)
+			fmt.Println("********************")
+			//oldLen := len(slice)
+
+			if GameFieldVisible.cell[x][y] == 0 {
+				//GameFieldVisible.cell[x][y] = 1
+
+				for _, element := range ShiftCoordinate {
+					//SetSurrounding(f, x, y, element.x, element.y)
+					dx := x + element.x
+					dy := y + element.y
+
+					// Check boundaries
+					if dx >= 0 && dy >= 0 &&
+						dx < GameFieldHeight && dy < GameFieldWidth {
+
+						if GameField.cell[x][y] == 0 && IndexOf(slice, GameVisibleCoord{y: dx, x: dy}) == -1 {
+							slice = append(slice, GameVisibleCoord{dx, dy})
+
+						}
+
+						GameFieldVisible.cell[dx][dy] = 1
+					}
+				}
+
+				//slice = SetSurroundingEmptyVisible(f, slice, realClick, x, y, element.x, element.y)
+
+			}
+
+			//GameFieldVisible.cell[x][y] = 1
+
+			//if len(slice) == oldLen {
+			//	break
+			//	return
+			//}
+
+			Display(false)
 		}
-
-		fmt.Println(slice)
-		//return
 	}
+
+	//if (GameField.cell[x][y] == 0 && realClick == true) || (realClick == false && GameFieldVisible.cell[x][y] == 0) {
+	//	//if GameField.cell[x][y] == 0 && realClick == true {
+	//	// show all empty cells
+	//	//old_array:= [...]int
+	//	GameFieldVisible.cell[x][y] = 1
+	//
+	//	//slice = append(slice, GameVisibleCoord{y, x})
+	//	var slice = make([]GameVisibleCoord, 0)
+	//	f := GameField.cell
+	//
+	//	for _, element := range ShiftCoordinate {
+	//		//SetSurrounding(f, x, y, element.x, element.y)
+	//		slice = SetSurroundingEmptyVisible(f, slice, realClick, x, y, element.x, element.y)
+	//	}
+	//
+	//	fmt.Println(slice)
+	//	//return
+	//}
 
 }
 
@@ -271,7 +320,7 @@ func main() {
 	//fmt.Println("*    0   - Visible Cell         *")
 	//fmt.Println("*        - Hidden Cell          *")
 	//fmt.Println("*    1-8 - Surrounding Cell     *")
-	//fmt.Println("*********************************\n")
+	//fmt.Println("*********************************")
 
 	if //goland:noinspection ALL
 	GameFieldBlackHoles > GameFieldWidth*GameFieldHeight {
@@ -282,15 +331,17 @@ func main() {
 	GameField = NewField(GameFieldBlackHoles) // Generated field
 	GameFieldVisible = NewField(0)            // Visible Field
 
-	fmt.Println("\nGenerated Game Field")
+	fmt.Println("Generated Game Field")
 	Display(true)
-	fmt.Println("\nSimulate few clicks at random places")
+	//time.Sleep(1)
+	fmt.Println("Simulate few clicks at random places")
+	//os.Exit(0)
 
 	for i := 0; i < GameFieldClicks; i++ {
 		y := GetRandomInt(GameFieldHeight)
 		x := GetRandomInt(GameFieldWidth)
 		fmt.Println()
-		fmt.Printf("Clicked at: %d, %d \n", x, y)
+		fmt.Println("Clicked at: ", x, y)
 		Click(y, x, true)
 		Display(false)
 	}
