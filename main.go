@@ -261,8 +261,14 @@ func Click(x, y int, realClick bool) {
 
 						if GameField.cell[x][y] == 0 && IndexOf(slice, GameVisibleCoord{y: dx, x: dy}) == -1 {
 							slice = append(slice, GameVisibleCoord{dx, dy})
+						}
+
+						if GameField.cell[x][y] >= 0 || GameFieldVisible.cell[x][y] == 1 {
+							// pop[0]
 
 						}
+
+						// slice = make([]GameVisibleCoord, 0)
 
 						GameFieldVisible.cell[dx][dy] = 1
 					}
