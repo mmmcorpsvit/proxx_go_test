@@ -10,7 +10,7 @@ import (
 
 const (
 	GameFieldWidth      = 10
-	GameFieldHeight     = 10
+	GameFieldHeight     = 6
 	GameFieldBlackHoles = 5
 	GameFieldClicks     = 1
 )
@@ -19,17 +19,17 @@ type ShiftCoordinateElement struct {
 	x, y int
 }
 
+// ShiftCoordinate array shift to get adjustment, see keyboard num block how comment
 var ShiftCoordinate = [...]ShiftCoordinateElement{
-	{x: -1, y: -1},
-	{x: -1, y: 0},
-	{x: -1, y: 1},
+	{x: -1, y: -1}, // 7
+	{x: 0, y: -1},  // 8
+	{x: 1, y: -1},  // 9
+	{x: 1, y: 0},   // 3
+	{x: 1, y: 1},   // 2
+	{x: 0, y: 1},   // 1
 
-	{x: 1, y: -1},
-	{x: 1, y: 0},
-	{x: 1, y: 1},
-
-	{x: 0, y: -1},
-	{x: 0, y: 1},
+	{x: -1, y: 1}, // 4
+	{x: -1, y: 0}, // 7
 }
 
 // Field represents a two-dimensional field of cells.
@@ -56,7 +56,7 @@ func SetSurrounding(cell [][]int, x, y, dx, dy int) {
 	dx = x + dx
 	dy = y + dy
 	if dx >= 0 && dy >= 0 && // Check boundaries
-		dx < GameFieldHeight && dy < GameFieldWidth &&
+		dx < GameFieldWidth && dy < GameFieldHeight &&
 		// This is not Black Hole ?
 		cell[dx][dy] != -1 {
 		cell[dx][dy]++ // Inc cell counter
@@ -64,9 +64,9 @@ func SetSurrounding(cell [][]int, x, y, dx, dy int) {
 }
 
 func CreateFieldMatrix(width, height int) [][]int {
-	f := make([][]int, GameFieldHeight)
+	f := make([][]int, width)
 	for i := range f {
-		f[i] = make([]int, GameFieldWidth)
+		f[i] = make([]int, height)
 	}
 	return f
 }
@@ -79,8 +79,8 @@ func NewField(gameFieldBlackHoles int) *Field {
 		// add Black Holes
 		blackHolesCounter := 0
 		for blackHolesCounter < gameFieldBlackHoles {
-			x := GetRandomInt(GameFieldHeight)
-			y := GetRandomInt(GameFieldWidth)
+			x := GetRandomInt(GameFieldWidth)
+			y := GetRandomInt(GameFieldHeight)
 
 			// update only this not Black Hole cell
 			if f[x][y] != -1 {
@@ -115,9 +115,9 @@ func Display(debug bool) {
 	}
 	fmt.Println()
 
-	for x := 0; x < GameFieldHeight; x++ {
+	for y := 0; y < GameFieldHeight; y++ {
 		s := ""
-		for y := 0; y < GameFieldWidth; y++ {
+		for x := 0; x < GameFieldWidth; x++ {
 			// TODO: do better output
 			//fmt.Print(strconv.FormatInt(int64(f.s[i][k]), 10) + "   ")
 			//value := 0
@@ -140,7 +140,7 @@ func Display(debug bool) {
 			s = s + v
 		}
 		// fmt.Print( x + "ddd" + s)
-		fmt.Print(x)
+		fmt.Print(y)
 		fmt.Print("| ")
 		fmt.Println(s)
 	}
@@ -213,11 +213,11 @@ func SetSurroundingEmptyVisible(cell [][]int, slice []GameVisibleCoord, realClic
 }
 
 func Click(x, y int, realClick bool) {
-	fmt.Printf("DEBUG Click set %d, %d", y, x)
+	fmt.Printf("DEBUG Click set %d, %d\n", x, y)
 
 	// cell already was clicked, ignore click and show message
 	if GameFieldVisible.cell[x][y] == 1 && realClick == true {
-		fmt.Printf("You already do Click, ignoring... %d, %d", y, x)
+		fmt.Printf("You already do Click, ignoring... %d, %d\n", x, y)
 		return
 	}
 
@@ -235,17 +235,32 @@ func Click(x, y int, realClick bool) {
 	}
 
 	if GameField.cell[x][y] == 0 {
-		var slice = make([]GameVisibleCoord, 0)
-		//first_run := true
-		slice = append(slice, GameVisibleCoord{y, x})
+		//var slice = make([]GameVisibleCoord, 0)
+		var visited = make(map[GameVisibleCoord]bool, 0)
+		//firstRun := true
+		//slice = append(slice, GameVisibleCoord{x, y})
+		visited[GameVisibleCoord{x, y}] = true
 		//oldLen := len(slice)
 
 		//GameFieldVisible.cell[x][y] = 1
 
-		for len(slice) > 0 {
-			fmt.Println(slice)
+		//for firstRun == true || len(slice) > 0 {
+		for len(visited) > 0 {
+			fmt.Println(visited)
 			fmt.Println("********************")
 			//oldLen := len(slice)
+
+			//if firstRun == false {
+
+			// TODO: WTF ??? how extract first element (any) from map ??? Ugly !!!
+			for k := range visited {
+				fmt.Println("First Element with loop", visited[k])
+				x = k.x
+				y = k.y
+				break
+			}
+
+			//}
 
 			if GameFieldVisible.cell[x][y] == 0 {
 				//GameFieldVisible.cell[x][y] = 1
@@ -256,12 +271,14 @@ func Click(x, y int, realClick bool) {
 					dy := y + element.y
 
 					// Check boundaries
+					// TODO: create func check boundaries
 					if dx >= 0 && dy >= 0 &&
 						dx < GameFieldHeight && dy < GameFieldWidth {
 
-						if GameField.cell[x][y] == 0 && IndexOf(slice, GameVisibleCoord{y: dx, x: dy}) == -1 {
-							slice = append(slice, GameVisibleCoord{dx, dy})
-
+						//if GameField.cell[x][y] == 0 && IndexOf(slice, GameVisibleCoord{x: dx, y: dy}) == -1 {
+						if GameField.cell[x][y] == 0 {
+							//slice = append(slice, GameVisibleCoord{dx, dy})
+							visited(GameVisibleCoord{dx, dy}) = true
 						}
 
 						GameFieldVisible.cell[dx][dy] = 1
@@ -272,6 +289,12 @@ func Click(x, y int, realClick bool) {
 
 			}
 
+			//if IndexOf(slice, GameVisibleCoord{y: x, x: y}) > 0 {
+			//	slice = slice[1:]
+			//}
+
+			//slice = slice[1:]
+
 			//GameFieldVisible.cell[x][y] = 1
 
 			//if len(slice) == oldLen {
@@ -279,7 +302,10 @@ func Click(x, y int, realClick bool) {
 			//	return
 			//}
 
-			Display(false)
+			//firstRun = false
+			fmt.Println(visited)
+			//Display(false)
+			return
 		}
 	}
 
@@ -338,11 +364,12 @@ func main() {
 	//os.Exit(0)
 
 	for i := 0; i < GameFieldClicks; i++ {
-		y := GetRandomInt(GameFieldHeight)
 		x := GetRandomInt(GameFieldWidth)
+		y := GetRandomInt(GameFieldHeight)
+
 		fmt.Println()
 		fmt.Println("Clicked at: ", x, y)
-		Click(y, x, true)
+		Click(x, y, true)
 		Display(false)
 	}
 
