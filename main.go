@@ -10,9 +10,9 @@ import (
 
 const (
 	GameFieldWidth      = 10
-	GameFieldHeight     = 6
+	GameFieldHeight     = 10
 	GameFieldBlackHoles = 5
-	GameFieldClicks     = 1
+	GameFieldClicks     = 5
 )
 
 type ShiftCoordinateElement struct {
@@ -213,7 +213,7 @@ func SetSurroundingEmptyVisible(cell [][]int, slice []GameVisibleCoord, realClic
 }
 
 func Click(x, y int, realClick bool) {
-	fmt.Printf("DEBUG Click set %d, %d\n", x, y)
+	//fmt.Printf("DEBUG Click set %d, %d\n", x, y)
 
 	// cell already was clicked, ignore click and show message
 	if GameFieldVisible.cell[x][y] == 1 && realClick == true {
@@ -246,15 +246,15 @@ func Click(x, y int, realClick bool) {
 
 		//for firstRun == true || len(slice) > 0 {
 		for len(visited) > 0 {
-			fmt.Println(visited)
-			fmt.Println("********************")
+			//fmt.Println(visited)
+			//fmt.Println("********************")
 			//oldLen := len(slice)
 
 			//if firstRun == false {
 
 			// TODO: WTF ??? how extract first element (any) from map ??? Ugly !!!
 			for k := range visited {
-				fmt.Println("First Element with loop", visited[k])
+				//fmt.Println("First Element with loop", visited[k])
 				x = k.x
 				y = k.y
 				break
@@ -304,7 +304,7 @@ func Click(x, y int, realClick bool) {
 			//}
 
 			//firstRun = false
-			fmt.Println(visited)
+			//fmt.Println(visited)
 			//Display(false)
 			//return
 		}
@@ -339,15 +339,15 @@ func Click(x, y int, realClick bool) {
 //}
 
 func main() {
-	//fmt.Println("*********************************")
-	//fmt.Println("*            PROXX              *")
-	//fmt.Println("*                               *")
-	//fmt.Println("* Legend:                       *")
-	//fmt.Println("*    H   - Black Hole           *")
-	//fmt.Println("*    0   - Visible Cell         *")
-	//fmt.Println("*        - Hidden Cell          *")
-	//fmt.Println("*    1-8 - Surrounding Cell     *")
-	//fmt.Println("*********************************")
+	fmt.Println("*********************************")
+	fmt.Println("*            PROXX              *")
+	fmt.Println("*                               *")
+	fmt.Println("* Legend:                       *")
+	fmt.Println("*    H   - Black Hole           *")
+	fmt.Println("*    0   - Visible Cell         *")
+	fmt.Println("*        - Hidden Cell          *")
+	fmt.Println("*    1-8 - Surrounding Cell     *")
+	fmt.Println("*********************************")
 
 	if //goland:noinspection ALL
 	GameFieldBlackHoles > GameFieldWidth*GameFieldHeight {
