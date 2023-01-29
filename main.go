@@ -262,32 +262,33 @@ func Click(x, y int, realClick bool) {
 
 			//}
 
-			if GameFieldVisible.cell[x][y] == 0 {
-				//GameFieldVisible.cell[x][y] = 1
+			//if GameFieldVisible.cell[x][y] == 0 {
+			delete(visited, GameVisibleCoord{x, y})
+			GameFieldVisible.cell[x][y] = 1
 
-				for _, element := range ShiftCoordinate {
-					//SetSurrounding(f, x, y, element.x, element.y)
-					dx := x + element.x
-					dy := y + element.y
+			for _, element := range ShiftCoordinate {
+				//SetSurrounding(f, x, y, element.x, element.y)
+				dx := x + element.x
+				dy := y + element.y
 
-					// Check boundaries
-					// TODO: create func check boundaries
-					if dx >= 0 && dy >= 0 &&
-						dx < GameFieldHeight && dy < GameFieldWidth {
+				// Check boundaries
+				// TODO: create func check boundaries
+				if dx >= 0 && dy >= 0 &&
+					dx < GameFieldWidth && dy < GameFieldHeight {
 
-						//if GameField.cell[x][y] == 0 && IndexOf(slice, GameVisibleCoord{x: dx, y: dy}) == -1 {
-						if GameField.cell[x][y] == 0 {
-							//slice = append(slice, GameVisibleCoord{dx, dy})
-							visited(GameVisibleCoord{dx, dy}) = true
-						}
-
-						GameFieldVisible.cell[dx][dy] = 1
+					//if GameField.cell[x][y] == 0 && IndexOf(slice, GameVisibleCoord{x: dx, y: dy}) == -1 {
+					if GameField.cell[dx][dy] == 0 && GameFieldVisible.cell[dx][dy] == 0 {
+						//slice = append(slice, GameVisibleCoord{dx, dy})
+						visited[GameVisibleCoord{dx, dy}] = true
 					}
+
+					GameFieldVisible.cell[dx][dy] = 1
 				}
-
-				//slice = SetSurroundingEmptyVisible(f, slice, realClick, x, y, element.x, element.y)
-
 			}
+
+			//slice = SetSurroundingEmptyVisible(f, slice, realClick, x, y, element.x, element.y)
+
+			//}
 
 			//if IndexOf(slice, GameVisibleCoord{y: x, x: y}) > 0 {
 			//	slice = slice[1:]
@@ -305,7 +306,7 @@ func Click(x, y int, realClick bool) {
 			//firstRun = false
 			fmt.Println(visited)
 			//Display(false)
-			return
+			//return
 		}
 	}
 
